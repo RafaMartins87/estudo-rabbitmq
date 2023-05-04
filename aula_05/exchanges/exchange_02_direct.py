@@ -9,11 +9,12 @@ connection = pika.BlockingConnection(
 channel = connection.channel()
 
 # Define exchange name and routing keys
-exchange_name = 'fanout_exchange'
+exchange_name = 'direct_exchange'
 
 # Declare exchange
 channel.exchange_declare(
-    exchange=exchange_name, exchange_type='fanout'
+    exchange=exchange_name, exchange_type='direct'
 )
 
 channel.close()
+print(" [x] SET" )

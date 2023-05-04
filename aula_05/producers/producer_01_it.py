@@ -9,10 +9,10 @@ connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
 # Create a channel
 channel = connection.channel()
 
-categories = ["ORDEM", "ORCAMENTO"]
-priorities = ["ALTA", "MEDIA", "BAIXA"]
-statuses = ["ABERTA", "ENCERRADA"]
-department = "SALES"
+categories = ["errors"]
+priorities = ["alta", "media", "baixa"]
+statuses = ["aberta", "encerrada"]
+department = "it"
 
 # Create a message
 for i in range(10_000):
@@ -27,20 +27,20 @@ for i in range(10_000):
     print(f" [x] Sent {message}")
     time.sleep(random.randint(0, 3))
 
-    if category == "ORDEM":
-        channel.basic_publish(
-            exchange="direct_exchange", routing_key="ordens", body=message
-        )
+    channel.basic_publish(
+        exchange="fanout_exchange", routing_key="it.*.alta.*", body=message
+    )
 
-    if category == "ORCAMENTO":
-        channel.basic_publish(
-            exchange="direct_exchange", routing_key="orcamentos", body=message
-        )
-
+    channel.basic_publish(
+        exchange="topic_exchange",
+        routing_key=f"{department}.{category}.{priority}.{status}",
+        body=message,
+    )
 
 # Close the connection
 connection.close()
 
 ## REGRAS DE ENVIO
-## 1. Todos orçamentos  são publicados no modo *direct*, rota *orcamentos*.
-## 2. Todas ordens de compra  são publicados no modo *direct*, rota *ordens*.
+
+## 1. Todos os logs são publicados no modo *fanout*.
+## 2. Todos erros de alta prioridade em aberto são publicados no modo *topic*, rota *department.category.priority.status*.

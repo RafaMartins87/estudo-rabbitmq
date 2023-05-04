@@ -20,3 +20,4 @@ for queue in queue_name_list:
     channel.queue_declare(queue=queue, durable=True)
 
 channel.close()
+print(" [x] SET" )
