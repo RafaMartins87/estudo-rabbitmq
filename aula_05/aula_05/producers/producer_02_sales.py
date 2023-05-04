@@ -4,37 +4,39 @@ import time
 import random
 
 # Establish a connection with RabbitMQ server
-connection = pika.BlockingConnection(
-    pika.ConnectionParameters('localhost')
-)
+connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
 
 # Create a channel
 channel = connection.channel()
 
-categories = ['ORDEM', 'ORCAMENTO']
-priorities = ['ALTA', 'MEDIA', 'BAIXA']
-statuses = ['ABERTA', 'ENCERRADA']
-department = 'SALES'
+categories = ["ORDEM", "ORCAMENTO"]
+priorities = ["ALTA", "MEDIA", "BAIXA"]
+statuses = ["ABERTA", "ENCERRADA"]
+department = "SALES"
 
-routes_list = ['eventos_importantes', 'orcamentos','ordens']
-
-# Create a message 
-for i in range (10_000):
-
+# Create a message
+for i in range(10_000):
     # Assemble message
     category = random.choice(categories)
     priority = random.choice(priorities)
     status = random.choice(statuses)
 
-    time_stamp = dt.datetime.strftime(dt.datetime.now(), format='%Y-%m-%d %H:%M:%S.%f')
-    message = f'{time_stamp} {i:6} Mensagem criada por {department} com prioridade {priority} para informar sobre {category}.'
-    
+    time_stamp = dt.datetime.strftime(dt.datetime.now(), format="%Y-%m-%d %H:%M:%S.%f")
+    message = f"{time_stamp} {i:6} Mensagem criada por {department} com prioridade {priority} para informar sobre {category}."
+
     print(f" [x] Sent {message}")
-    time.sleep(random.randint(0,3))
-    
-    channel.basic_publish(exchange='direct_exchange', routing_key='orcamentos', body=message)
-    
-    channel.basic_publish(exchange='direct_exchange', routing_key='ordens', body=message)
+    time.sleep(random.randint(0, 3))
+
+    if category == "ORDEM":
+        channel.basic_publish(
+            exchange="direct_exchange", routing_key="ordens", body=message
+        )
+
+    if category == "ORCAMENTO":
+        channel.basic_publish(
+            exchange="direct_exchange", routing_key="orcamentos", body=message
+        )
+
 
 # Close the connection
 connection.close()
